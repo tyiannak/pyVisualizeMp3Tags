@@ -11,6 +11,9 @@ import argparse
 import os
 from tqdm import tqdm
 from mutagen.id3 import ID3
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
 
 def list_mp3_files(path_name, recursively = False):
     """! Lists all audio files in a particular folder
@@ -35,6 +38,20 @@ def list_mp3_files(path_name, recursively = False):
 
     return sorted(audio_files)
 
+
+def generate_word_cloud(list_of_tags, output_file, show = False):
+    text = " ".join([at["artist"].lower().replace(" ", "_") 
+    	for at in list_of_tags])
+
+    wordcloud = WordCloud().generate(text)
+
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.savefig(output_file)
+    if show:
+	    plt.show()
+
+
 def get_mp3_tags(file_path):
     """! Gets mp3 tags from an audio file
 
@@ -52,23 +69,29 @@ def get_mp3_tags(file_path):
             track = mp3Info["TIT2"].text[0]        
         return {"artist": artist, "track": track, "album": album}      
     except:
-        return {}
+        return None
+
 
 def parseArguments():
     parser = argparse.ArgumentParser(prog='PROG')
-    parser.add_argument('-i', '--input', nargs=None,
+    parser.add_argument('-i', '--input', nargs=None, required = True,
                         help="Input audio paths (list of folders)")
+    parser.add_argument('-o', '--output', nargs=None, required = True,
+                        help="Output figure file")
+    parser.add_argument('-s', '--show', action='store_true')
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
     args = parseArguments()
-    audiopath = args.input
 
-    mp3_paths = list_mp3_files(audiopath, True)
+    mp3_paths = list_mp3_files(args.input, True)
+    all_tags = []
     for mp3_path in tqdm(mp3_paths):
-    	print get_mp3_tags(mp3_path)
-
+    	cur_tag = get_mp3_tags(mp3_path)
+    	if cur_tag:
+    		all_tags.append(cur_tag)
+    generate_word_cloud(all_tags, args.output, args.show)
 
 
