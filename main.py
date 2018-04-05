@@ -13,7 +13,7 @@ from tqdm import tqdm
 from mutagen.id3 import ID3
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-
+from PyLyrics import *
 
 def list_mp3_files(path_name, recursively = False):
     """! Lists all audio files in a particular folder
@@ -45,6 +45,25 @@ def generate_word_cloud(list_of_tags, output_file, show = False):
 
     wordcloud = WordCloud().generate(text)
 
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.savefig(output_file)
+    if show:
+	    plt.show()
+
+
+def generate_word_cloud_2(list_of_tags, output_file, show = False):
+    text = []
+    for at in tqdm(list_of_tags):
+    	try:
+    		print at["artist"],at["track"]
+	    	text.append(PyLyrics.getLyrics(at["artist"],at["track"]))
+        except:
+	    	cur_text = ""
+    text = " ".join(text).lower()
+    print text
+
+    wordcloud = WordCloud().generate(text)
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")
     plt.savefig(output_file)
@@ -92,6 +111,6 @@ if __name__ == '__main__':
     	cur_tag = get_mp3_tags(mp3_path)
     	if cur_tag:
     		all_tags.append(cur_tag)
+    #generate_word_cloud_2(all_tags, args.output, args.show)
     generate_word_cloud(all_tags, args.output, args.show)
-
 
