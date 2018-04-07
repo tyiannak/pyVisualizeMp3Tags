@@ -21,8 +21,10 @@ python main.py -i punk_collection -o punk.png -s -l
 (use python main.py -h to see explaination of all command-line arguments)
 
 ## Examples
-Artist tag cloud:
+Artist tag cloud
+
 ![artist tag cloud example](data/punk.png)
 
-Lyrics tag cloud:
+Lyrics tag cloud
+
 ![lyrics tag cloud example](data/lyrics_punk.png)
