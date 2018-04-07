@@ -53,16 +53,22 @@ def generate_word_cloud(list_of_tags, output_file, show = False):
         plt.show()
 
 
-def generate_word_cloud_2(list_of_tags, output_file, show = False):
+def generate_word_cloud_lyrics(list_of_tags, output_file, show = False):
     text = []
     for at in tqdm(list_of_tags):
         try:
-            print at["artist"],at["track"]
-            text.append(PyLyrics.getLyrics(at["artist"],at["track"]))
+            text.append(PyLyrics.getLyrics(at["artist"], at["track"]))
         except:
-            cur_text = ""
+            print "Sub not found", at["artist"], at["track"]
+
     text = " ".join(text).lower()
-    print text
+    n_lyrics_found = len(text)
+    if n_lyrics_found == 0:
+        print "No lyrics were found for the particular files!"
+        return
+
+    print "{} lyrics found for {} mp3 files in total".format(len(text),
+                                                             len(list_of_tags))
 
     wordcloud = WordCloud().generate(text)
     plt.imshow(wordcloud, interpolation='bilinear')
@@ -81,11 +87,11 @@ def get_mp3_tags(file_path):
     try:
         artist = track = album = ""
         mp3Info = ID3(file_path)
-        if ("TPE1" in mp3Info):
+        if "TPE1" in mp3Info:
             artist = mp3Info["TPE1"].text[0]
-        if ("TALB" in mp3Info):
+        if "TALB" in mp3Info:
             album = mp3Info["TALB"].text[0]
-        if ("TIT2" in mp3Info) :
+        if "TIT2" in mp3Info:
             track = mp3Info["TIT2"].text[0]        
         return {"artist": artist, "track": track, "album": album}      
     except:
@@ -95,10 +101,13 @@ def get_mp3_tags(file_path):
 def parseArguments():
     parser = argparse.ArgumentParser(prog='PROG')
     parser.add_argument('-i', '--input', nargs=None, required = True,
-                        help="Input audio paths (list of folders)")
+                        help="Input audio path (folder that contains mp3)")
     parser.add_argument('-o', '--output', nargs=None, required = True,
                         help="Output figure file")
-    parser.add_argument('-s', '--show', action='store_true')
+    parser.add_argument('-l', '--lyrics', action='store_true',
+                        help="Also produce lyrics tags (needs time)")
+    parser.add_argument('-s', '--show', action='store_true',
+                        help="Plot results")
     args = parser.parse_args()
     return args
 
@@ -112,6 +121,8 @@ if __name__ == '__main__':
         cur_tag = get_mp3_tags(mp3_path)
         if cur_tag:
             all_tags.append(cur_tag)
-    #generate_word_cloud_2(all_tags, args.output, args.show)
+
     generate_word_cloud(all_tags, args.output, args.show)
+    if args.lyrics:
+        generate_word_cloud_lyrics(all_tags, "lyrics_" + args.output, args.show)
 
