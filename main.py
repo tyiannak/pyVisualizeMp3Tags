@@ -43,8 +43,8 @@ def list_mp3_files(path_name, recursively = False):
 def generate_word_cloud(list_of_tags, output_file, show = False):
     text = " ".join([at["artist"].lower().replace(" ", "_")
                      for at in list_of_tags])
-
-    wordcloud = WordCloud().generate(text)
+    print(text)
+    wordcloud = WordCloud(width=800, height=400).generate(text)
 
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")
@@ -59,16 +59,16 @@ def generate_word_cloud_lyrics(list_of_tags, output_file, show = False):
         try:
             text.append(PyLyrics.getLyrics(at["artist"], at["track"]))
         except:
-            print "Sub not found", at["artist"], at["track"]
+            print("Sub not found", at["artist"], at["track"])
 
     text = " ".join(text).lower()
     n_lyrics_found = len(text)
     if n_lyrics_found == 0:
-        print "No lyrics were found for the particular files!"
+        print("No lyrics were found for the particular files!")
         return
 
-    print "{} lyrics found for {} mp3 files in total".format(len(text),
-                                                             len(list_of_tags))
+    print("{} lyrics found for {} mp3 files in total".format(len(text),
+                                                             len(list_of_tags)))
 
     wordcloud = WordCloud().generate(text)
     plt.imshow(wordcloud, interpolation='bilinear')
